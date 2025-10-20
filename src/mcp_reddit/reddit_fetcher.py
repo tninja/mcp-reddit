@@ -17,6 +17,46 @@ client = Client(*CREDS)
 logging.getLogger().setLevel(logging.WARNING)
 
 @mcp.tool()
+async def search_reddit(query: str, time: str = "week", subreddit: str = "", limit: int = 10) -> str:
+    """
+    Search for Reddit submissions using a query
+
+    Args:
+        query: Search query string
+        time: Time filter - either: 'all', 'hour', 'day', 'week', 'month', 'year' (default: 'all')
+        subreddit: Subreddit name to search in. Use empty string to search all of Reddit (default: '')
+        limit: Number of posts to fetch (default: 10)
+
+    Returns:
+        Human readable string containing list of matching submission information
+    """
+    try:
+        posts = []
+        result = client.p.submission.search(sr=subreddit, query=query, time=time)
+        count = 0
+        async for submission in result:
+            if count >= limit:
+                break
+            post_info = (
+                f"Title: {submission.title}\n"
+                f"Score: {submission.score}\n"
+                f"Comments: {submission.comment_count}\n"
+                f"Author: {submission.author_display_name or '[deleted]'}\n"
+                f"Type: {_get_post_type(submission)}\n"
+                f"Content: {_get_content(submission)}\n"
+                f"Link: https://reddit.com{submission.permalink}\n"
+                f"---"
+            )
+            posts.append(post_info)
+            count += 1
+
+        return "\n\n".join(posts) if posts else "No results found."
+
+    except Exception as e:
+        logging.error(f"An error occurred: {str(e)}")
+        return f"An error occurred: {str(e)}"
+
+@mcp.tool()
 async def fetch_reddit_hot_threads(subreddit: str, limit: int = 10) -> str:
     """
     Fetch hot threads from a subreddit
