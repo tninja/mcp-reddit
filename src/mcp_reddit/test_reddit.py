@@ -32,18 +32,23 @@ class TestRedditAPI(unittest.IsolatedAsyncioTestCase):
         async for submission in result:
             if count >= 10:
                 break
-            post_info = (
-                f"Title: {submission.title}\n"
-                f"Score: {submission.score}\n"
-                f"Comments: {submission.comment_count}\n"
-                f"Author: {submission.author_display_name or '[deleted]'}\n"
-                f"Type: {_get_post_type(submission)}\n"
-                f"Content: {_get_content(submission)}\n"
-                f"Link: https://reddit.com{submission.permalink}\n"
-                f"---"
-            )
-            posts.append(post_info)
-            count += 1
+            post_type = _get_post_type(submission)
+            post_content = _get_content(submission)
+            if post_content is not None:
+                post_content = post_content.strip()
+            if post_type == 'text' and post_content is not None and post_content != '':
+                post_info = (
+                    f"Title: {submission.title}\n"
+                    f"Score: {submission.score}\n"
+                    f"Comments: {submission.comment_count}\n"
+                    f"Author: {submission.author_display_name or '[deleted]'}\n"
+                    f"Type: {post_type}\n"
+                    f"Content: {post_content}\n"
+                    f"Link: https://reddit.com{submission.permalink}\n"
+                    f"---"
+                )
+                posts.append(post_info)
+                count += 1
         print("\n\n".join(posts) if posts else "No results found.")
 
 def _get_content(submission) -> Optional[str]:
