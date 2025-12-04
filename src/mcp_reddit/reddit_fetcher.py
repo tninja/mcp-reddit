@@ -17,7 +17,7 @@ client = Client(*CREDS)
 logging.getLogger().setLevel(logging.WARNING)
 
 @mcp.tool()
-async def search_reddit(query: str, time: str = "week", subreddit: str = "", limit: int = 10) -> str:
+async def search_reddit(query: str, time: str = "week", subreddit: str = "", limit: int = 10, max_content_length: int = 2000) -> str:
     """
     Search for Reddit submissions using a query
 
@@ -26,6 +26,7 @@ async def search_reddit(query: str, time: str = "week", subreddit: str = "", lim
         time: Time filter - either: 'all', 'hour', 'day', 'week', 'month', 'year' (default: 'all')
         subreddit: Subreddit name to search in. Use empty string to search all of Reddit (default: '')
         limit: Number of posts to fetch (default: 10)
+        max_content_length: Maximum characters for post content (default: 2000)
 
     Returns:
         Human readable string containing list of matching submission information
@@ -41,6 +42,9 @@ async def search_reddit(query: str, time: str = "week", subreddit: str = "", lim
             post_content = _get_content(submission)
             if post_content is not None:
                 post_content = post_content.strip()
+                # Truncate content if it exceeds max_content_length
+                if len(post_content) > max_content_length:
+                    post_content = post_content[:max_content_length] + "..."
             if post_type == 'text' and post_content is not None and post_content != '':
                 post_info = (
                     f"Title: {submission.title}\n"
@@ -165,3 +169,6 @@ def _get_content(submission) -> Optional[str]:
     elif isinstance(submission, GalleryPost):
         return str(submission.gallery_link)
     return None
+
+if __name__ == "__main__":
+    mcp.run()
