@@ -17,7 +17,14 @@ client = Client(*CREDS)
 logging.getLogger().setLevel(logging.WARNING)
 
 @mcp.tool()
-async def search_reddit(query: str, time: str = "week", subreddit: str = "", limit: int = 10, max_content_length: int = 2000) -> str:
+async def search_reddit(
+    query: str,
+    time: str = "week",
+    subreddit: str = "",
+    limit: int = 10,
+    max_content_length: int = 2000,
+    post_type_filter: str = "text",
+) -> str:
     """
     Search for Reddit submissions using a query
 
@@ -27,6 +34,7 @@ async def search_reddit(query: str, time: str = "week", subreddit: str = "", lim
         subreddit: Subreddit name to search in. Use empty string to search all of Reddit (default: '')
         limit: Number of posts to fetch (default: 10)
         max_content_length: Maximum characters for post content (default: 2000)
+        post_type_filter: Post type to include (default: 'text')
 
     Returns:
         Human readable string containing list of matching submission information
@@ -45,7 +53,11 @@ async def search_reddit(query: str, time: str = "week", subreddit: str = "", lim
                 # Truncate content if it exceeds max_content_length
                 if len(post_content) > max_content_length:
                     post_content = post_content[:max_content_length] + "..."
-            if post_type == 'text' and post_content is not None and post_content != '':
+            if (
+                post_type == post_type_filter
+                and post_content is not None
+                and post_content != ''
+            ):
                 post_info = (
                     f"Title: {submission.title}\n"
                     f"Score: {submission.score}\n"
