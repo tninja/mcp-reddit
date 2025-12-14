@@ -65,7 +65,7 @@ async def search_reddit(
                     f"Author: {submission.author_display_name or '[deleted]'}\n"
                     f"Type: {post_type}\n"
                     f"Content: {post_content}\n"
-                    f"Link: https://reddit.com{submission.permalink}\n"
+                    f"Url: {submission.permalink}\n"
                     f"---"
                 )
                 posts.append(post_info)
